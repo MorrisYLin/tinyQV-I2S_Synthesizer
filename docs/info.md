@@ -9,7 +9,7 @@ You can also include images in this folder and reference them in the markdown. E
 
 ## What it does
 
-Explain what your peripheral does and how it works
+This peripheral includes MAC units for processing a N-tap FIR filter
 
 ## Register map
 
