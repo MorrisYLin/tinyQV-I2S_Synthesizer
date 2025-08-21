@@ -45,14 +45,30 @@ module tqvp_example (
         end
     end
 
-    // The bottom 8 bits of the stored data are added to ui_in and output to uo_out.
-    assign uo_out = example_data[7:0] + ui_in;
+    // Implement another 32-bit read/write register at address 4
+    reg [31:0] example_data_2;
+    always @(posedge clk) begin
+        if (!rst_n) begin
+            example_data_2 <= 0;
+        end else begin
+            if (address == 6'h4) begin
+                if (data_write_n != 2'b11)              example_data_2[7:0]   <= data_in[7:0];
+                if (data_write_n[1] != data_write_n[0]) example_data_2[15:8]  <= data_in[15:8];
+                if (data_write_n == 2'b10)              example_data_2[31:16] <= data_in[31:16];
+            end
+        end
+    end
 
-    // Address 0 reads the example data register.  
-    // Address 4 reads ui_in
+    // The bottom 8 bits of both stored data are added to ui_in and output to uo_out.
+    assign uo_out = example_data[7:0] + example_data_2[7:0] + ui_in;
+
+    // Address 0 reads the example data register.
+    // Address 4 reads the other example data register.
+    // Address 8 reads ui_in
     // All other addresses read 0.
     assign data_out = (address == 6'h0) ? example_data :
-                      (address == 6'h4) ? {24'h0, ui_in} :
+                      (address == 6'h4) ? example_data_2 :
+                      (address == 6'h8) ? {24'h0, ui_in} :
                       32'h0;
 
     // All reads complete in 1 clock
