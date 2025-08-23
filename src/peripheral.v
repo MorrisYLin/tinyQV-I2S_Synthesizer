@@ -8,7 +8,7 @@
 // Change the name of this module to something that reflects its functionality and includes your name for uniqueness
 // For example tqvp_yourname_spi for an SPI peripheral.
 // Then edit tt_wrapper.v line 41 and change tqvp_example to your chosen module name.
-module tqvp_example (
+module tqvp_morris_marcus_i2s_synth (
     input         clk,          // Clock - the TinyQV project clock is normally set to 64MHz.
     input         rst_n,        // Reset_n - low to reset.
 
@@ -29,8 +29,24 @@ module tqvp_example (
     output        data_ready,
 
     output        user_interrupt  // Dedicated interrupt request for this peripheral
-);
+);  
 
+    wire i2s_sck;
+    reg [26:0] factor;
+
+    clk_divider clk_i2s_sck_divider (
+        clk,
+        factor,
+        i2s_sck
+    );
+
+    /*
+    // List all unused inputs to prevent warnings
+    // data_read_n is unused as none of our behaviour depends on whether
+    // registers are being read.
+    wire _unused = &{data_read_n, 1'b0};
+
+      EXAMPLE PERIPHERAL
     // Implement a 32-bit read/write register at address 0
     reg [31:0] example_data;
     always @(posedge clk) begin
@@ -38,9 +54,9 @@ module tqvp_example (
             example_data <= 0;
         end else begin
             if (address == 6'h0) begin
-                if (data_write_n != 2'b11)              example_data[7:0]   <= data_in[7:0];
-                if (data_write_n[1] != data_write_n[0]) example_data[15:8]  <= data_in[15:8];
-                if (data_write_n == 2'b10)              example_data[31:16] <= data_in[31:16];
+                if (data_write_n != 2'b11)              example_data <= data_in[7:0];
+                if (data_write_n[1] != data_write_n[0]) example_data <= data_in[15:8];
+                if (data_write_n == 2'b10)              example_data <= data_in[31:16];
             end
         end
     end
@@ -82,5 +98,5 @@ module tqvp_example (
     // data_read_n is unused as none of our behaviour depends on whether
     // registers are being read.
     wire _unused = &{data_read_n, 1'b0};
-
+    */
 endmodule
