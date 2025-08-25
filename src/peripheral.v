@@ -34,18 +34,39 @@ module tqvp_morris_marcus_i2s_synth (
     wire i2s_sck;
     reg [26:0] factor;
 
+    // From https:
+    // //electronics.stackexchange.com/questions/102588/mclk-in-i2s-audio-protocol
+    // SCK frequency of 256 * sample_rate is common
+    // Given 44.1kHz sampling frequency, aiming for approximately 11.29 MHz
+    // If want to accomodate 256-bit samples, should aim for minimum 11.29 MHz,
+    // so default factor = ceil(64 MHz / 11.29 MHz) = 6
+    always @(posedge clk) begin
+        if (!rst_n) begin
+            factor <= 27'h6;
+        end
+    end
+
     clk_divider clk_i2s_sck_divider (
-        clk,
-        factor,
-        i2s_sck
+        .fast_clk(clk),
+        .reset(rst_n),
+        .factor(factor),
+        .slow_clk(i2s_sck)
     );
 
-    /*
+    // For now, MSB of data_out, regardless of what address, will be i2s_sck
+    assign data_out = {i2s_sck, 31'h0};
+
     // List all unused inputs to prevent warnings
     // data_read_n is unused as none of our behaviour depends on whether
     // registers are being read.
-    wire _unused = &{data_read_n, 1'b0};
+    wire _unused = &{ui_in, address, data_in, data_write_n, data_read_n, 1'b0};
 
+    // Unused outputs
+    assign uo_out = 8'h0;
+    assign data_ready = 1'h0;
+    assign user_interrupt = 1'h0;
+
+    /*
       EXAMPLE PERIPHERAL
     // Implement a 32-bit read/write register at address 0
     reg [31:0] example_data;
