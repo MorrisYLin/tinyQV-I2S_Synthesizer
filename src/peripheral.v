@@ -39,10 +39,10 @@ module tqvp_morris_marcus_i2s_synth (
     // SCK frequency of 256 * sample_rate is common
     // Given 44.1kHz sampling frequency, aiming for approximately 11.29 MHz
     // If want to accomodate 256-bit samples, should aim for minimum 11.29 MHz,
-    // so default factor = ceil(64 MHz / 11.29 MHz) = 6
+    // so default factor = floor(64 MHz / 11.29 MHz) = 5
     always @(posedge clk) begin
         if (!rst_n) begin
-            factor <= 27'h6;
+            factor <= 27'h5;
         end
     end
 
