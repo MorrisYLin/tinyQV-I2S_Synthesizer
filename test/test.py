@@ -7,6 +7,8 @@ from cocotb.triggers import ClockCycles
 
 from tqv import TinyQV
 
+from math import floor
+
 # When submitting your design, change this to the peripheral number
 # in peripherals.v.  e.g. if your design is i_user_peri05, set this to 5.
 # The peripheral number is not used by the test harness.
@@ -32,6 +34,17 @@ async def test_project(dut):
 
     dut._log.info("Test project behavior")
 
+    # Would do more in-depth test of
+    # if clock divider is working,
+    # but realize that in-built delay
+    # will make this test useless / impossible
+    out_val = await tqv.read_word_reg(0)
+    assert out_val & 0xfffffffe == 0x0
+
+    # Non-register read
+    assert await tqv.read_word_reg(4) == 0x0
+
+    '''
     # Test register write and read back
     await tqv.write_word_reg(0, 0x12345678)
     assert await tqv.read_byte_reg(0) == 0x78
@@ -71,7 +84,8 @@ async def test_project(dut):
     # Interrupt doesn't clear
     await ClockCycles(dut.clk, 10)
     assert await tqv.is_interrupt_asserted()
-    
+
     # Write bottom bit of address 8 high to clear
     await tqv.write_byte_reg(8, 1)
     assert not await tqv.is_interrupt_asserted()
+    '''

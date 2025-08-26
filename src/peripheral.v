@@ -53,8 +53,13 @@ module tqvp_morris_marcus_i2s_synth (
         .slow_clk(i2s_sck)
     );
 
-    // For now, MSB of data_out, regardless of what address, will be i2s_sck
-    assign data_out = {i2s_sck, 31'h0};
+    // Address 0 reads i2s_sck in LSB.
+    // All other addresses read 0.
+    assign data_out = (address == 6'h0) ? {31'h0, i2s_sck} :
+                      32'h0;
+
+    // All reads complete in 1 clock
+    assign data_ready = 1'b1;
 
     // List all unused inputs to prevent warnings
     // data_read_n is unused as none of our behaviour depends on whether
@@ -63,7 +68,6 @@ module tqvp_morris_marcus_i2s_synth (
 
     // Unused outputs
     assign uo_out = 8'h0;
-    assign data_ready = 1'h0;
     assign user_interrupt = 1'h0;
 
     /*
@@ -85,16 +89,6 @@ module tqvp_morris_marcus_i2s_synth (
     // The bottom 8 bits of the stored data are added to ui_in and output to uo_out.
     assign uo_out = example_data[7:0] + ui_in;
 
-    // Address 0 reads the example data register.  
-    // Address 4 reads ui_in
-    // All other addresses read 0.
-    assign data_out = (address == 6'h0) ? example_data :
-                      (address == 6'h4) ? {24'h0, ui_in} :
-                      32'h0;
-
-    // All reads complete in 1 clock
-    assign data_ready = 1;
-    
     // User interrupt is generated on rising edge of ui_in[6], and cleared by writing a 1 to the low bit of address 8.
     reg example_interrupt;
     reg last_ui_in_6;
