@@ -53,10 +53,11 @@ module tqvp_morris_marcus_i2s_synth (
         .slow_clk(i2s_sck)
     );
 
-    // Address 0 reads i2s_sck in LSB.
-    // All other addresses read 0.
-    assign data_out = (address == 6'h0) ? {31'h0, i2s_sck} :
-                      32'h0;
+    // Expose I2S SCK on uo_out[1]
+    assign uo_out = {6'h0, i2s_sck, 1'h0};
+
+    // All addresses read 0.
+    assign data_out = 32'h0;
 
     // All reads complete in 1 clock
     assign data_ready = 1'b1;
@@ -67,7 +68,6 @@ module tqvp_morris_marcus_i2s_synth (
     wire _unused = &{ui_in, address, data_in, data_write_n, data_read_n, 1'b0};
 
     // Unused outputs
-    assign uo_out = 8'h0;
     assign user_interrupt = 1'h0;
 
     /*

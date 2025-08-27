@@ -7,7 +7,7 @@ from cocotb.triggers import ClockCycles
 
 from tqv import TinyQV
 
-from math import floor
+from math import floor, ceil
 
 # When submitting your design, change this to the peripheral number
 # in peripherals.v.  e.g. if your design is i_user_peri05, set this to 5.
@@ -34,14 +34,21 @@ async def test_project(dut):
 
     dut._log.info("Test project behavior")
 
-    # Would do more in-depth test of
-    # if clock divider is working,
-    # but realize that in-built delay
-    # will make this test useless / impossible
-    out_val = await tqv.read_word_reg(0)
-    assert out_val & 0xfffffffe == 0x0
+    factor = 0x5
 
-    # Non-register read
+    # Test I2S SCK on uo_out[1]
+    assert dut.uo_out.value == 0x00
+    await ClockCycles(dut.clk, ceil(factor / 2) + 1) # add offset to allow ouptut to propagate
+    assert dut.uo_out.value == 0x02
+    await ClockCycles(dut.clk, ceil(factor / 2))
+    assert dut.uo_out.value == 0x00
+    await ClockCycles(dut.clk, ceil(factor / 2))
+    assert dut.uo_out.value == 0x02
+    await ClockCycles(dut.clk, ceil(factor / 2))
+    assert dut.uo_out.value == 0x00
+    await ClockCycles(dut.clk, ceil(factor / 2))
+
+    assert await tqv.read_word_reg(0) == 0x0
     assert await tqv.read_word_reg(4) == 0x0
 
     '''
