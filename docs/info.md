@@ -9,20 +9,18 @@ You can also include images in this folder and reference them in the markdown. E
 
 ## What it does
 
-This peripheral includes MAC units for processing a N-tap FIR filter
+This peripheral outputs a I2S data stream.
 
 ## Register map
 
-Document the registers that are used to interact with your peripheral
-
 | Address | Name  | Access | Description                                                         |
 |---------|-------|--------|---------------------------------------------------------------------|
-| 0x00    | DATA  | R/W    | A word of data                                                      |
+| 0x00    | SCK   | R      | LSB is I2S's SCK                                                    |
 
 ## How to test
 
-Explain how to use your project
+Something, something, write a few registers, then watch the I2S sound (PCM-coded data) stream out!
 
 ## External hardware
 
-List external hardware used in your project (e.g. PMOD, LED display, etc), if any
+A I2S stereo decoder, like Adafruit's UDA1334A (https://learn.adafruit.com/adafruit-i2s-stereo-decoder-uda1334a/pinouts).
