@@ -32,7 +32,7 @@ module tqvp_morris_marcus_i2s_synth (
 );  
 
     wire i2s_sck;
-    reg [26:0] factor;
+    reg [26:0] i2s_sck_factor;
 
     // From https:
     // //electronics.stackexchange.com/questions/102588/mclk-in-i2s-audio-protocol
@@ -42,19 +42,64 @@ module tqvp_morris_marcus_i2s_synth (
     // so default factor = floor(64 MHz / 11.29 MHz) = 5
     always @(posedge clk) begin
         if (!rst_n) begin
-            factor <= 27'h5;
+            i2s_sck_factor <= 27'h5;
         end
     end
 
     clk_divider clk_i2s_sck_divider (
         .fast_clk(clk),
         .reset(rst_n),
-        .factor(factor),
+        .factor(i2s_sck_factor),
         .slow_clk(i2s_sck)
     );
 
-    // Expose I2S SCK on uo_out[1]
-    assign uo_out = {6'h0, i2s_sck, 1'h0};
+    wire i2s_ws;
+    reg [26:0] i2s_ws_factor;
+
+    // Want one half-period to be
+    // 16 i2s_sck periods.
+    // With the current (technically
+    // bugged) design of clk_divider,
+    // i2s_sck has a period of 6 clk periods.
+    // Therefore, i2s_ws should have a period
+    // of 32 i2s_sck periods or 192 clk periods.
+    // To get this, with this bugged
+    // clk_divider, set factor to 191.
+    always @(posedge clk) begin
+        if (!rst_n) begin
+            i2s_ws_factor <= 27'hbf;
+        end
+    end
+
+    clk_divider clk_i2s_ws_divider (
+        .fast_clk(clk),
+        .reset(rst_n),
+        .factor(i2s_ws_factor),
+        .slow_clk(i2s_ws)
+    );
+
+    reg [15:0] example_left_data;
+    reg [15:0] example_right_data;
+
+    always @(posedge clk) begin
+        if (!rst_n) begin
+            example_left_data <= 16'h30f9;
+            example_right_data <= 16'h7c5a;
+        end
+    end
+
+    wire i2s_sd;
+    i2s_16_transmitter i2s (
+        .sck(i2s_sck),
+        .reset(rst_n),
+        .data_left(example_left_data),
+        .data_right(example_right_data),
+        .ws(i2s_ws),
+        .sd(i2s_sd)
+    );
+
+    // Expose SCK on uo_out[1], WS on uo_out[2], SD on uo_out[3]
+    assign uo_out = {4'h0, i2s_sd, i2s_ws, i2s_sck, 1'h0};
 
     // All addresses read 0.
     assign data_out = 32'h0;

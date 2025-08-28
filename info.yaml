@@ -19,6 +19,8 @@ project:
   source_files:
     - "peripheral.v"
     - "clk_divider.v"
+    - "i2s_transmitter.v"
+    - "piso_shift_reg.v"
     - "tt_wrapper.v"
     - "test_harness/falling_edge_detector.sv"
     - "test_harness/rising_edge_detector.sv"
