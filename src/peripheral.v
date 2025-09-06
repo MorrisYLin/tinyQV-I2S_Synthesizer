@@ -114,15 +114,57 @@ module tqvp_morris_marcus_i2s_synth (
         end
     end
 
-    // Drop to low to reset, hold to next i2s_sck
-    reg i2s_rst;
+    // https://vlsifacts.com/how-to-implement-a-finite-state-machine-fsm-in-verilog-practical-examples-and-best-practices/#google_vignette
+    parameter INACTIVE      = 0'b00;
+    parameter ACTIVE_SCK_HI = 0'b01;
+    parameter ACTIVE_SCK_LO = 0'b10;
+    reg [1:0] i2s_rst_state, next_i2s_rst_state;
+
     always @(posedge clk) begin
-        if (!rst_n | trig_i2s_rst)
-            i2s_rst <= 1'b0;
-        else if (!i2s_sck)
-            i2s_rst <= i2s_rst;
+        if (!rst_n)
+            i2s_rst_state <= ACTIVE;
         else
-            i2s_rst <= 1'b1;
+            state <= next_state;
+    end
+
+    // Drop to low to reset, hold to next
+    // i2s_sck rising edge
+    reg i2s_rst;
+    always @(*) begin
+        case(i2s_rst_state)
+            INACTIVE: begin
+                if (!rst_n | trig_i2s_rst) begin
+                    next_i2s_rst_state = i2s_sck ?
+                        ACTIVE_SCK_HI : ACTIVE_SCK_LO;
+                    i2s_rst = 1'b0;
+                end else begin
+                    next_i2s_rst_state = INACTIVE;
+                    i2s_rst = 1'b1;
+                end
+            end
+            ACTIVE_SCK_HI: begin
+                if (!i2s_sck) begin
+                    next_i2s_rst_state = ACTIVE_SCK_LO;
+                    i2s_rst = 1'b0;
+                end else begin
+                    next_i2s_rst_state = ACTIVE_SCK_HI;
+                    i2s_rst = 1'b0;
+                end
+            end
+            ACTIVE_SCK_LO: begin
+                if (i2s_sck) begin
+                    next_i2s_rst_state = INACTIVE;
+                    i2s_rst = 1'b1;
+                end else begin
+                    next_i2s_rst_state = ACTIVE_SCK_LO;
+                    i2s_rst = 1'b0;
+                end
+            end
+            default: begin
+                next_i2s_rst_state = ACTIVE;
+                i2s_rst = 1'b1;
+            end
+        endcase
     end
 
     wire i2s_sd;
