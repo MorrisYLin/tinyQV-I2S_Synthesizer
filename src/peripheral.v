@@ -122,7 +122,7 @@ module tqvp_morris_marcus_i2s_synth (
 
     always @(posedge clk) begin
         if (!rst_n)
-            i2s_rst_state <= ACTIVE;
+            i2s_rst_state <= ACTIVE_SCK_LO;
         else
             state <= next_state;
     end
