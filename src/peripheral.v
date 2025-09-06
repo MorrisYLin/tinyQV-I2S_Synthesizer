@@ -118,6 +118,7 @@ module tqvp_morris_marcus_i2s_synth (
     parameter INACTIVE      = 2'b00;
     parameter ACTIVE_SCK_HI = 2'b01;
     parameter ACTIVE_SCK_LO = 2'b10;
+    parameter HOLDING       = 2'b11;
     reg [1:0] i2s_rst_state, next_i2s_rst_state;
 
     always @(posedge clk) begin
@@ -153,12 +154,16 @@ module tqvp_morris_marcus_i2s_synth (
             end
             ACTIVE_SCK_LO: begin
                 if (i2s_sck) begin
-                    next_i2s_rst_state = INACTIVE;
-                    i2s_rst = 1'b1;
+                    next_i2s_rst_state = HOLDING;
+                    i2s_rst = 1'b0;
                 end else begin
                     next_i2s_rst_state = ACTIVE_SCK_LO;
                     i2s_rst = 1'b0;
                 end
+            end
+            HOLDING: begin
+                next_i2s_rst_state = INACTIVE;
+                i2s_rst = 1'b1;
             end
             default: begin
                 next_i2s_rst_state = ACTIVE_SCK_LO;
