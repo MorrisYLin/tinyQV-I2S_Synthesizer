@@ -80,26 +80,6 @@ module tqvp_morris_marcus_i2s_synth (
         .slow_clk(i2s_ws)
     );
 
-    reg [15:0] example_left_data;
-    reg [15:0] example_right_data;
-
-    always @(posedge clk) begin
-        if (!rst_n) begin
-            example_left_data <= 16'h30f9;
-            example_right_data <= 16'h7c5a;
-        end
-    end
-
-    wire i2s_sd;
-    i2s_16_transmitter i2s (
-        .sck(i2s_sck),
-        .reset(rst_n),
-        .data_left(example_left_data),
-        .data_right(example_right_data),
-        .ws(i2s_ws),
-        .sd(i2s_sd)
-    );
-
     // STRT: 32-bit write register at address 0
     // BUSY: 32-bit read register, bit 0 is status
 
@@ -113,6 +93,40 @@ module tqvp_morris_marcus_i2s_synth (
         else
             busy <= busy;
     end
+
+    reg [15:0] example_left_data;
+    reg [15:0] example_right_data;
+
+    always @(posedge clk) begin
+        if (!rst_n) begin
+            example_left_data <= 16'h30f9;
+            example_right_data <= 16'h7c5a;
+        end
+    end
+
+    reg i2s_rst;
+    always @(posedge clk) begin
+        if (!rst_n)
+            i2s_rst <= 1'b1;
+        else
+            i2s_rst <= i2s_rst;
+    end
+
+    always @(posedge busy) begin
+        i2s_rst <= 1'b1;
+    end
+
+    assign i2s_rst = rst_n | busy;
+
+    wire i2s_sd;
+    i2s_16_transmitter i2s (
+        .sck(i2s_sck),
+        .reset(i2s_rst),
+        .data_left(example_left_data),
+        .data_right(example_right_data),
+        .ws(i2s_ws),
+        .sd(i2s_sd)
+    );
 
     // All other addresses read 0
     assign data_out = (address == 6'h4) ?
