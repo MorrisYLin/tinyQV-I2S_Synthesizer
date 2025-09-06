@@ -90,8 +90,6 @@ module tqvp_morris_marcus_i2s_synth (
         else if (address < 6'h4 &&
                  data_write_n != 2'b11)
             busy <= 1'b1;
-        else
-            busy <= busy;
     end
 
     reg [15:0] example_left_data;
@@ -109,7 +107,7 @@ module tqvp_morris_marcus_i2s_synth (
         if (!rst_n || busy)
             i2s_rst <= 1'b1;
         else
-            i2s_rst <= i2s_rst;
+            i2s_rst <= 1'b0;
     end
 
     wire i2s_sd;
