@@ -98,8 +98,24 @@ module tqvp_morris_marcus_i2s_synth (
         .sd(i2s_sd)
     );
 
-    // Expose SCK on uo_out[1], WS on uo_out[2], SD on uo_out[3]
-    assign uo_out = {4'h0, i2s_sd, i2s_ws, i2s_sck, 1'h0};
+    reg start;
+    // STRT: 32-bit write register at address 0
+    always @(posedge clk) begin
+        if (!rst_n)
+            start <= 1'b0;
+        else if (address < 6'h4 &&
+                 data_write_n != 2'b11)
+            start <= 1'b1;
+        else
+            start <= 1'b0;
+    end
+
+    // Expose
+    // SCK on uo_out[1],
+    // WS on uo_out[2],
+    // SD on uo_out[3],
+    // STRT on uo_out[4]
+    assign uo_out = {3'h0, start, i2s_sd, i2s_ws, i2s_sck, 1'h0};
 
     // All addresses read 0.
     assign data_out = 32'h0;
@@ -110,7 +126,7 @@ module tqvp_morris_marcus_i2s_synth (
     // List all unused inputs to prevent warnings
     // data_read_n is unused as none of our behaviour depends on whether
     // registers are being read.
-    wire _unused = &{ui_in, address, data_in, data_write_n, data_read_n, 1'b0};
+    wire _unused = &{ui_in, data_in, data_read_n, 1'b0};
 
     // Unused outputs
     assign user_interrupt = 1'h0;
