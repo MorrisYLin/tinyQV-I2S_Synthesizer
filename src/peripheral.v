@@ -102,7 +102,7 @@ module tqvp_morris_marcus_i2s_synth (
         end
     end
 
-    assign trig_i2s_rst = (prev_busy ^ busy) & busy;
+    assign trig_i2s_rst = busy & (!prev_busy);
 
     reg [15:0] example_left_data;
     reg [15:0] example_right_data;
@@ -114,12 +114,13 @@ module tqvp_morris_marcus_i2s_synth (
         end
     end
 
+    // Drop to low to reset
     reg i2s_rst;
     always @(posedge clk) begin
         if (!rst_n | trig_i2s_rst)
-            i2s_rst <= 1'b1;
-        else
             i2s_rst <= 1'b0;
+        else
+            i2s_rst <= 1'b1;
     end
 
     wire i2s_sd;
