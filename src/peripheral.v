@@ -98,30 +98,33 @@ module tqvp_morris_marcus_i2s_synth (
         .sd(i2s_sd)
     );
 
-    reg start;
     // STRT: 32-bit write register at address 0
+    // BUSY: 32-bit read register, bit 0 is status
+
+    reg busy;
     always @(posedge clk) begin
         if (!rst_n)
-            start <= 1'b0;
+            busy <= 1'b0;
         else if (address < 6'h4 &&
                  data_write_n != 2'b11)
-            start <= 1'b1;
+            busy <= 1'b1;
         else
-            start <= 1'b0;
+            busy <= busy;
     end
+
+    // All other addresses read 0
+    assign data_out = (address == 6'h4) ?
+                        {31'h0, busy} : 32'h0;
+
+    // All reads complete in 1 clock
+    assign data_ready = 1'b1;
 
     // Expose
     // SCK on uo_out[1],
     // WS on uo_out[2],
     // SD on uo_out[3],
     // STRT on uo_out[4]
-    assign uo_out = {3'h0, start, i2s_sd, i2s_ws, i2s_sck, 1'h0};
-
-    // All addresses read 0.
-    assign data_out = 32'h0;
-
-    // All reads complete in 1 clock
-    assign data_ready = 1'b1;
+    assign uo_out = {4'h0, i2s_sd, i2s_ws, i2s_sck, 1'h0};
 
     // List all unused inputs to prevent warnings
     // data_read_n is unused as none of our behaviour depends on whether

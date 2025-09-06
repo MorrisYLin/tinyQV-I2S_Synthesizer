@@ -88,11 +88,11 @@ async def test_project(dut):
     assert await tqv.read_word_reg(0) == 0x0
     assert await tqv.read_word_reg(4) == 0x0
 
-    # Test write to STRT
+    # Test write to STRT, read on BUSY
     await tqv.write_word_reg(0, 0x0)
-    # await ClockCycles(dut.clk, 1)
-
-    assert (dut.uo_out.value & 0b10000) >> 4 == 1
+    assert await tqv.read_byte_reg(4) == 0x1
+    assert await tqv.read_hword_reg(4) == 0x1
+    assert await tqv.read_word_reg(4) == 0x1
 
     '''
     # Test register write and read back
