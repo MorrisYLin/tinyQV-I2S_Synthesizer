@@ -114,11 +114,13 @@ module tqvp_morris_marcus_i2s_synth (
         end
     end
 
-    // Drop to low to reset
+    // Drop to low to reset, hold to next i2s_sck
     reg i2s_rst;
     always @(posedge clk) begin
         if (!rst_n | trig_i2s_rst)
             i2s_rst <= 1'b0;
+        else if (!i2s_sck)
+            i2s_rst <= i2s_rst;
         else
             i2s_rst <= 1'b1;
     end
