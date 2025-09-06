@@ -84,13 +84,18 @@ module tqvp_morris_marcus_i2s_synth (
     // BUSY: 32-bit read register, bit 0 is status
 
     reg busy;
+    wire busy_wire;
     always @(posedge clk) begin
         if (!rst_n)
             busy <= 1'b0;
         else if (address < 6'h4 &&
                  data_write_n != 2'b11)
             busy <= 1'b1;
+        else
+            busy <= busy;
     end
+
+    assign busy_wire = busy;
 
     reg [15:0] example_left_data;
     reg [15:0] example_right_data;
@@ -103,8 +108,8 @@ module tqvp_morris_marcus_i2s_synth (
     end
 
     reg i2s_rst;
-    always @(posedge clk or posedge busy) begin
-        if (!rst_n || busy)
+    always @(posedge clk or posedge busy_wire) begin
+        if (!rst_n || busy_wire)
             i2s_rst <= 1'b1;
         else
             i2s_rst <= 1'b0;
