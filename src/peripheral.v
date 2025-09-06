@@ -161,7 +161,7 @@ module tqvp_morris_marcus_i2s_synth (
                 end
             end
             default: begin
-                next_i2s_rst_state = ACTIVE;
+                next_i2s_rst_state = ACTIVE_SCK_LO;
                 i2s_rst = 1'b1;
             end
         endcase
