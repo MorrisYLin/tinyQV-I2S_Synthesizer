@@ -37,12 +37,14 @@ module tqvp_morris_marcus_i2s_synth (
     // From https:
     // //electronics.stackexchange.com/questions/102588/mclk-in-i2s-audio-protocol
     // SCK frequency of 256 * sample_rate is common
-    // Given 44.1kHz sampling frequency, aiming for approximately 11.29 MHz
-    // If want to accomodate 256-bit samples, should aim for minimum 11.29 MHz,
-    // so default factor = floor(64 MHz / 11.29 MHz) = 5
+    // However, only sending 16 bit packets, so
+    // arbitrarily just multiply sample_rate by 64
+    // Given 44.1kHz sampling frequency, aiming for approximately 2.82 MHz
+    // So, aiming for around 2.82 MHz,
+    // so default factor = 64 MHz / 2.82 MHz = ~22.69 = ~23
     always @(posedge clk) begin
         if (!rst_n) begin
-            i2s_sck_factor <= 27'h5;
+            i2s_sck_factor <= 27'h17;
         end
     end
 
@@ -60,14 +62,14 @@ module tqvp_morris_marcus_i2s_synth (
     // 16 i2s_sck periods.
     // With the current (technically
     // bugged) design of clk_divider,
-    // i2s_sck has a period of 6 clk periods.
+    // i2s_sck has a period of 24 clk periods.
     // Therefore, i2s_ws should have a period
-    // of 32 i2s_sck periods or 192 clk periods.
+    // of 32 i2s_sck periods or 768 clk periods.
     // To get this, with this bugged
-    // clk_divider, set factor to 191.
+    // clk_divider, set factor to 767.
     always @(posedge clk) begin
         if (!rst_n) begin
-            i2s_ws_factor <= 27'hbf;
+            i2s_ws_factor <= 27'h2ff;
         end
     end
 

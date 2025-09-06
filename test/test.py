@@ -76,7 +76,7 @@ async def test_project(dut):
     '''
 
     # Test I2S SCK on uo_out[1]
-    factor = 0x5
+    factor = 0x17
 
     sck_sample = dut.uo_out.value & 0b10
     for _ in range(10):
