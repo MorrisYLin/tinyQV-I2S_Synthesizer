@@ -124,7 +124,7 @@ module tqvp_morris_marcus_i2s_synth (
         if (!rst_n)
             i2s_rst_state <= ACTIVE_SCK_LO;
         else
-            i2s_rst_state <= i2s_rst_next_state;
+            i2s_rst_state <= next_i2s_rst_state;
     end
 
     // Drop to low to reset, hold to next
