@@ -105,15 +105,11 @@ module tqvp_morris_marcus_i2s_synth (
     end
 
     reg i2s_rst;
-    always @(posedge clk) begin
-        if (!rst_n)
+    always @(posedge clk or posedge busy) begin
+        if (!rst_n || busy)
             i2s_rst <= 1'b1;
         else
             i2s_rst <= i2s_rst;
-    end
-
-    always @(posedge busy) begin
-        i2s_rst <= 1'b1;
     end
 
     wire i2s_sd;
