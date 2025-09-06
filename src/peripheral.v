@@ -116,8 +116,6 @@ module tqvp_morris_marcus_i2s_synth (
         i2s_rst <= 1'b1;
     end
 
-    assign i2s_rst = rst_n | busy;
-
     wire i2s_sd;
     i2s_16_transmitter i2s (
         .sck(i2s_sck),
