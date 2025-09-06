@@ -115,9 +115,9 @@ module tqvp_morris_marcus_i2s_synth (
     end
 
     // https://vlsifacts.com/how-to-implement-a-finite-state-machine-fsm-in-verilog-practical-examples-and-best-practices/#google_vignette
-    parameter INACTIVE      = 0'b00;
-    parameter ACTIVE_SCK_HI = 0'b01;
-    parameter ACTIVE_SCK_LO = 0'b10;
+    parameter INACTIVE      = 2'b00;
+    parameter ACTIVE_SCK_HI = 2'b01;
+    parameter ACTIVE_SCK_LO = 2'b10;
     reg [1:0] i2s_rst_state, next_i2s_rst_state;
 
     always @(posedge clk) begin
